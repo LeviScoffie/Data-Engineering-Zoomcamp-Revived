@@ -8,3 +8,4 @@ week1basicsnsetup/1_Terraform_GCP/.terraform/terraform.tfstate
 week1basicsnsetup/2_docker_sql/zones_data.ipynb
 week1basicsnsetup/1_Terraform_GCP/.terraform/providers
 week1basicsnsetup/1_Terraform_GCP/.terraform/providers/registry.terraform.io/hashicorp/google/4.34.0/linux_amd64/terraform-provider-google_v4.34.0_x5
+week1basicsnsetup/1_Terraform_GCP/.terraform/providers/registry.terraform.io/hashicorp/google/4.34.0/linux_amd64
