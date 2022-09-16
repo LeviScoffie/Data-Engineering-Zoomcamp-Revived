@@ -27,7 +27,7 @@ Run in Terminal
 ---
 ## How to setup an environment in Google Cloud
 
-Before we create an instance, we need to generate an SSH key. The key will then be used to generate an instance of the VM.
+ Before we create an instance, we need to generate an SSH key. The key will then be used to generate an instance of the VM.
 
 https://cloud.google.com/compute/docs/connect/create-ssh-keys
 
@@ -51,6 +51,8 @@ Go to terminal and input `ssh -i ~/.ssh/gcp leviscoffie@34.65.209.138`
 
 `htop` to check specs of the virtual machine we have created.
 
+## **CONFIGURING VM INSTANCE**
+
 
 Download anaconda to this instance and the type `bash Anaconda3-2022.05-Linux-x86_64.sh` to run it and while it installs, open anothr terminsl and cd into ssh folder where you will create a `config ` folder using ` touch config`
 * Cofigure the file 
@@ -65,8 +67,25 @@ Download anaconda to this instance and the type `bash Anaconda3-2022.05-Linux-x8
 Download Remote-SSH and the click on bottom let corner where there is _open a remote window_
 * Choose the host _de-z00camp_ which has already been configured above.
 
+#### **BASHRC**
 
-* Executable files show green in terminal and thus you can make execute using  `chmod +x /NAME OF FILE/`
+* Use command `less .bashrc` - a file that is executed everytime we log into the virtual machine
+
+* `source .bashrc`
+
+
+### Configuring VSCODE to Access VM instance
+
+* In extensions download _remote-ssh_
+* Click on open a remote window at the far bottom left of vscode screen.
+* Select connect to host, and since we has already defined the host in our config file we then shoould be able to be given the option of out virtual machine which de-zoomcamp.
+
+* mean while you can install docker and docker compile to the virtual machine instance.
+
+* You can then clone the project repo into the ssh remote connection interface.
+
+
+* Executable files show green in terminal and thus you can make executable using  `chmod +x /NAME OF FILE/`
 
 * Now when you dont want to keep going to the bin directory. we can make it visible from any directory  and thus we  need to add docker compose to the path variable.
 
