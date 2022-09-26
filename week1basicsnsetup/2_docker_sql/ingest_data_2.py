@@ -23,12 +23,12 @@ def main(params):
     port=params.port
     db=params.db
     tablename=params.tablename
-    URL=params.URL
+    url=params.url
     parquet_name= 'output.parquet'
     
     
     # download parquet, convert to csv
-    #URL="http://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2021-01.parquet"
+    URL="http://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2021-01.parquet"
     os.system(f"wget {URL}  -O {parquet_name}")
     
     engine=create_engine(f"postgresql://{user}:{password}@{host}:{port}/{db}")  # connecting to the docker postgres locally
@@ -87,7 +87,7 @@ if __name__=='__main__':
     parser.add_argument('--port',help='port for postgres')
     parser.add_argument('--db',help='database name for postgres')
     parser.add_argument('--tablename',help='name of table where we will write the results to')
-    parser.add_argument('--URL',help='link of the csv file')
+    parser.add_argument('--url',help='link of the csv file')
                         
 
     args = parser.parse_args()
