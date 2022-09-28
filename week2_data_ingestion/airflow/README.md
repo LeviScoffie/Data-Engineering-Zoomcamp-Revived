@@ -148,6 +148,72 @@ Initializes your aiflow backend  and other env variables. And also configs, the 
 
 * It makes use of the airflow credentials provided by official airflow setup.
 
-* After init has been done there will be a success code 0 and then kick up all other services of the container. That is the backednd, schedulers and workers, webservers etc.
+* After init has been done there will be a success code 0 and then kick up all other services of the container
+using `docker compose up`. That is the backend, schedulers and workers, webservers etc.
 
 * Use webserver to acces airflow's UI. PASS DEFAULT SET OF CREDETNIALS PROVIDED IN THE OFFICIAL SETUP.
+
+### THE ANATOMY OF A DAG
+- Check the typical work flow components,  and write out ingestion pipeline to ingest some compressed raw data to a data lake.
+
+4 main components of a workflow:
+* DAG - Directed Acyclic Graph that specifies the dependecies between a set of tasks with explicit execution order.
+* Task - A defined unit of work alias _operators and airlfow_. They descirbe what to do; be it fetching the data, running analysis, triggering other systems etc.
+* DAG Run- Individual execution or run of a DAG
+* Task Instance - Individual run of a single task. Also have an indicative state which could be running succesfully
+
+
+#### DAG STRUCTURE
+An airflow dag is defined in a python script. Composed of a dag definition, tasks e.g operators, and task dependecies.
+
+When declaring a DAG we use an implicit way using a **context manager**
+
+A DAG runs through a series of tasks and there are three common types of tasks i.e:
+ - Operators - these are predefined tasks that u can string together quickly to build most part of dags.
+ - Sensors - A special subclass of operators that are entirly about waiting for an external event to happen.
+ - A task flow decorator - custom python fxn packaged up as a task.
+
+ Tasks are defined based on the abstraction of operators which rep a single ..
+
+ Atomic operators are best becasue they do not need to share resources and therefore can stand on their own. You can chose a python operator() , bash operator() or any other operators provided  by a client or a respiurce you're using such  as google.
+
+ Aiflow is agnostic to wht u are using.
+
+ Every single operator must be defined to a DAG. Either using a `with` operator or by passing a DAG_ID into each of the operators or tasks.
+
+ Parameterizing DAGs always includes an interval.
+ There are also default arguments inside a DAG. And many DAGs need the same set of default arguments e.g start_date.
+
+ Rather than having to specify that individually for every operator, you can call it early in the script and will be auto applied to any operator tied to it.
+
+
+ ##### Task Dependecies.
+ Responsible for the control flow within  a DAG.
+ A task operator does not usually live alone.It has dependecies on other tasks.
+
+ The declaration of these dependecies are done with bit shift operators such as `>>`.
+ By default a task will run when all its upstream parent tasks have succeeded.
+
+ To pass the data between tasks, we have 2 options;
+  - **XCOM variable** - a system that can have tasks   push and pull small bits of metadata.
+  - Updload and Download large files from a storage service.
+
+Airflow sends out tasks to run on workers as space becomes available so there's no guarantee all the tasks in your dag will run on the same worker or on the same machine.
+
+There are also features for letting you easily pre-configure access to a central resource like a data source in the form of connections and hooks.
+
+
+##### DAG RUNs
+In two ways:
+- Triggering manually or via API.
+- Schedule then using the schedule interval variable.
+
+A new instance of a DAG is created every time a DAG is run. DaG runs can be in parallel for the same dag  and each has a defined data interval also defined by the execution date which defines the period of the data the task should operator on.
+
+This is useful in cases where airflow can backfill the DAG and run copies of it for every day in those previous runs.
+
+
+##### Task Instances.
+An instance of a task is a specific run of DAG task for a given Dag AND thus for a given data interval. There are also reps of a task that has state reppn what stage of the life cycle it is in.
+Some of task instaces include: _none, scheduled,queued,running, success, failed, upstream-failed_ .
+Ideally: none>>scheduled>>queued>>running>>success.
