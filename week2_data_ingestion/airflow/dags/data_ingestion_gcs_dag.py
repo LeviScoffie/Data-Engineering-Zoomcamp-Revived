@@ -118,17 +118,17 @@ with DAG(
     # refers to source file tht was uploaded to the gcs, extract schema and create an exteranl table
     # based on that. IN A MORE READBLE FORMAT
     
-    bigquery_external_table_task = BigQueryCreateExternalTableOperator (
-        task_id = "bigquery_external_table_task",
-        table_resources = {
+    bigquery_external_table_task = BigQueryCreateExternalTableOperator(
+        task_id="bigquery_external_table_task",
+        table_resource={
             "tableReference": {
                 "projectId": PROJECT_ID,
                 "datasetId": BIGQUERY_DATASET,
                 "tableId": "external_table",
             },
-            "externalDataConfiguration":{
-                "sourceFormat":"PARQUET",
-                "sourceUris":[f"gs://{BUCKET}/raw/{parquet_file}"],
+            "externalDataConfiguration": {
+                "sourceFormat": "PARQUET",
+                "sourceUris": [f"gs://{BUCKET}/raw/{parquet_file}"],
             },
         },
     )
