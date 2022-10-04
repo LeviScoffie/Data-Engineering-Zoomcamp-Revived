@@ -17,24 +17,25 @@ import pyarrow.parquet as pq
 
 
 #import some values from env variables in docker-compose yml. setup into our local variables.
-PROJECT_ID= os.environ.get ('loyal-glass-359906')
-BUCKET= os.environ.get('dtc_data_lake_loyal-glass-359906')
+PROJECT_ID= os.environ.get("GCP_PROJECT_ID")
+BUCKET= os.environ.get("GCP_GCS_BUCKET")
 
-dataset_file= "yellow_trpdata_2021-01.parquet"
+dataset_file= "yellow_tripdata_2021-01.parquet"
 dataset_url= f"https://d37ci6vzurychx.cloudfront.net/trip-data/{dataset_file}"
 path_to_local_home = os.environ.get("AIRFLOW_HOME","/opt/AIRFLOW/")
-parquet_file=dataset_file.replace('.csv','.parquet') #to be used incase fiil is csv.
+parquet_file=dataset_file #.replace('.csv','.parquet') #to be used incase fiil is csv.
 BIGQUERY_DATASET = os.environ.get ("BIGQUERY_DATASET",'trips_data_all')
 
 
 #todo incase file is csv and want to convert it to parquet def fxn operator:Takes an input
 # of a source file and converts it to a parquet format
-def format_to_parquet (src_file):
-    if not src_file.endswith('.csv'):
-        logging.error("Can only accept source files in csv format, for the moment")
-        return
-    table = pv.read_csv(src_file)
-    pq.write_table(table, src_file.replaace('.csv','.parquet'))
+# def format_to_parquet (src_file):
+#     if not src_file.endswith('.csv'):
+#         logging.error("Can only accept source files in csv format, for the moment")
+#         return
+    
+#     table = pv.read_csv(src_file)
+#     pq.write_table(table, src_file.replace('.csv','.parquet'))
     
     
 # c
@@ -56,11 +57,15 @@ def upload_to_gcs (bucket, object_name, local_file):
     storage.blob._DEFAULT_CHUNKSIZE= 5 * 1024 * 1024 #5mb
     #END OF WORKAROUND
     
+    # if BUCKET:
+    #     STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+        
     client = storage.Client() # creates a client for gcs storage
-    bucket = client.bucket(bucket) # attaches itself to a bucket that u are passing as an input
+    bucket = client.bucket(BUCKET) # attaches itself to a bucket that u are passing as an input
     
     blob = bucket.blob(object_name)
-    blob.upload_from_filename(localfile) # uploads file that it is supposed to uplooad to a target location
+    blob.upload_from_filename(local_file) # uploads file that it is supposed to uplooad to a target location
+    
     
     
   #ref:  
@@ -95,20 +100,20 @@ with DAG(
     # if using a  managed service for airflow env it stores in memory
     # if using docker env. it will store in one of the temp locations or specified dir for the file downloaded.
     # converts to parquet format but not needed at the moment since data set is parquet arealdy
-    format_to_parquet = PythonOperator(
-    task_id="format_to_parquet_task"    ,
-    python_callable= format_to_parquet,
-    op_kwargs={
-        "src_file":f"{path_to_local_home}/{dataset_file}"
-    }
-    ,
-    )
+    # format_to_parquet = PythonOperator(
+    # task_id="format_to_parquet_task"    ,
+    # python_callable= format_to_parquet,
+    # op_kwargs={
+    #     "src_file": f"{path_to_local_home}/{dataset_file}"
+    # }
+    # ,
+    # )
     # uploads paquet file to expected gcs location
     local_to_gcs_task = PythonOperator (
         task_id  ="local_to_gcs_task",
         python_callable =upload_to_gcs,
         op_kwargs ={
-            "bucket":BUCKET,
+            "bucket": BUCKET,
             "object_name": f"raw/{parquet_file}",
             "local_file": f"{path_to_local_home}/{parquet_file}",
         },
@@ -135,4 +140,6 @@ with DAG(
     
     ## DEFINE WORKFLOW OF HOW DIRECTION OF TASKS SHOULD BE
     
-    download_dataset_task >> format_to_parquet >> local_to_gcs_task >> bigquery_external_table_task
+    download_dataset_task  >> local_to_gcs_task >> bigquery_external_table_task
+    
+    # >> format_to_parquet
