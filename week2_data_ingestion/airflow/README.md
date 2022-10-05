@@ -217,3 +217,75 @@ This is useful in cases where airflow can backfill the DAG and run copies of it 
 An instance of a task is a specific run of DAG task for a given Dag AND thus for a given data interval. There are also reps of a task that has state reppn what stage of the life cycle it is in.
 Some of task instaces include: _none, scheduled,queued,running, success, failed, upstream-failed_ .
 Ideally: none>>scheduled>>queued>>running>>success.
+
+## DAGIFY WEEK1 
+- We now want to take the ingestion scprit that we did in week 1 and put it in a data pipeline to automate the whole process of ETL.
+
+PLAN
+* Start with the docker-compose from week2
+* Chnage the DAG mappings
+* Create a new DAG with two dummies
+* Make then run monthly
+* Create a bash operator , pass the params(`execution date strfitime (% Y-%m))
+* Download the data
+* Put theingestion script to airflow
+* Modify dependcies-add ingest script dependencies
+* Put the old docker compose file in the same network.
+
+1. Use the downloaded docker compose yml file. Just change the volume mapping becasue the intial dag folder contain the py scipt that was used to ingest data into gcs. Contained the workflow for uploading data to gcs bucket.
+
+We now want to ingest the data to a local DB . ie. postgres. AND The steps mentioned above are what we are going to follow.
+
+* Create a new folder `dags_new` and start from scratch. No prior history of other dags. 
+
+* In docker-compose file map the dags_new volume to it. Also switch the .env file abit to match the postgres.
+
+* Do due processes and the foward the webserver port.Open the webserver and there are no dags because the mappings were in a new directory in docker compsoe file
+
+
+### CREATING A DAG.
+* Cretea a py file.
+* Import DAG defintions then the BASH and Python Operators.
+
+* To create a task we use the operators.
+
+ **[READ COMMENTS ON PY SCRIPT]**
+
+ The schedule interval can be cron expersion. We can use the crontab guru. Think through how we want to execute the job.
+ In thec case of montlhy, from JAN to FEB to MARCH.
+ * Say now we collect data of JAN and wait a bit to process it and process it in FEB  2nd and so on and so forth.
+ * WAit for a month to be over then execute processing of the data on the 2nd of each month.
+ * Using cron tab guru every 2nd day of the month at 7:00 am we schedule our job. and process all data collected over the previous month.
+
+ * The logs on airflow webserver show how the code peforms and thge codes and commands executed. Tasks executed in correct order. 
+ * We use a bash operator to download the file. Remote machine its faster. which I am using currently,.
+
+ * While running DAG we find that there is no wget so we can install it in dockerfiile and do dockercompose up all over again. Or we can use curl instead.
+
+ * Not good to qrite to output.csv. This is because when running the DAGS, there may be overwring whicha may corrupt a file. We want each task to write to its own output file.
+
+ `{{ execution_date.strftime(\'%Y-%m\')` is what will differentiate the differnce datasets and we use it to parameterize the downloads. repalce in src linke. Its a truncation of the date timestamp to e.g `2021-01`.
+
+
+ * Puting the ingestion script to airflow.
+ * Create a  new file under dags_new directory and put all the logic of processing the csv file there
+
+ * `--no-cache-dir` in dockefile it means that it will not save things to cache. hence it will skip that part.hence image is not large. so update the dockerfile beacue we will needs the pandas library to operate with in the Python Operator.
+
+ #### HOW DO WE CONNECT 2 YAML FILES?
+ run docker network ls
+
+ ## todo VM memory and CPU cannot run airflow docker.
+
+ * Go to airflow worker and then try to connect to the pg datbase of week 1 from the worker.
+ - Run `docker exec -it (worker id container) bash` 
+ - Run python
+ - Use it to check for connection if the airflow worker can connect to a database that is outside airflow. Used docker compose networks ;
+ ```from sqlalchemy import create_engine
+ engine= create_engine(f"postgresql://{root}:{root}@{pgdatabase2}:{5432}/{ny_taxi}")
+ engine.connect()
+ ```
+
+All the tasks in airflow should be idempotent. That is droppig database and creating a new one. Goodness of this line of code
+
+` df.head(n=0).to_sql(name=tablename,con=engine, if_exists='replace')`

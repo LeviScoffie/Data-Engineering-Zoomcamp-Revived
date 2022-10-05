@@ -97,9 +97,11 @@ with DAG(
         bash_command =f"curl  -sSL {dataset_url} > {path_to_local_home}/{dataset_file}"
     )
     ## Once dowloaded it could stores itself into: 
-    # if using a  managed service for airflow env it stores in memory
-    # if using docker env. it will store in one of the temp locations or specified dir for the file downloaded.
-    # converts to parquet format but not needed at the moment since data set is parquet arealdy
+    ## if using a  managed service for airflow env it stores in memory
+    ## if using docker env. it will store in one of the temp locations or specified dir for the file downloaded.
+    ## converts to parquet format but not needed at the moment since data set is parquet arealdy
+    
+    
     # format_to_parquet = PythonOperator(
     # task_id="format_to_parquet_task"    ,
     # python_callable= format_to_parquet,
@@ -108,7 +110,8 @@ with DAG(
     # }
     # ,
     # )
-    # uploads paquet file to expected gcs location
+    
+    ## uploads paquet file to expected gcs location
     local_to_gcs_task = PythonOperator (
         task_id  ="local_to_gcs_task",
         python_callable =upload_to_gcs,
