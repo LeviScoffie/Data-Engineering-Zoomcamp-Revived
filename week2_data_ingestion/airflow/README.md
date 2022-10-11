@@ -217,3 +217,27 @@ This is useful in cases where airflow can backfill the DAG and run copies of it 
 An instance of a task is a specific run of DAG task for a given Dag AND thus for a given data interval. There are also reps of a task that has state reppn what stage of the life cycle it is in.
 Some of task instaces include: _none, scheduled,queued,running, success, failed, upstream-failed_ .
 Ideally: none>>scheduled>>queued>>running>>success.
+
+
+#### Ingest.Py putting into airflow
+ Step 1: Get parquet file 
+ Step 2: Ingest to postgres DB
+
+ Plan:
+ * Start with the docker_compose
+ * Change the DAG mappings
+ * Create a new DAG with 2 dummies
+ * Make them run montly
+ * Create a bash operator, pass the params (execution_date.strftime(\%Y-%m\))
+ * Download the data
+ * Put the ingestion script to airflow
+ * Modify dependecides - add the ingest script dependecies
+ * Put the old docker compose file in the same network
+
+
+
+ - First, create new folder under airflow dir called `dags_new`.
+ - Go to the docker compose file previously used by airflow and map dags_new to airflow directory.
+
+
+ - When using a virtual machine, you press CTRL ~ to open terminal and forward the port that has been expsoed in the docker image.
