@@ -281,6 +281,8 @@ We now want to ingest the data to a local DB . ie. postgres. AND The steps menti
  - Run `docker exec -it (worker id container) bash` 
  - Run python
  - Use it to check for connection if the airflow worker can connect to a database that is outside airflow. Used docker compose networks ;
+
+ 
  ```from sqlalchemy import create_engine
  engine= create_engine(f"postgresql://{root}:{root}@{pgdatabase2}:{5432}/{ny_taxi}")
  engine.connect()
@@ -289,3 +291,10 @@ We now want to ingest the data to a local DB . ie. postgres. AND The steps menti
 All the tasks in airflow should be idempotent. That is droppig database and creating a new one. Goodness of this line of code
 
 ` df.head(n=0).to_sql(name=tablename,con=engine, if_exists='replace')`
+
+## After Airflow-Init failed. These were the steps used to reproduce.
+
+` df.head(n=0).to_sql(name=tablename,con=engine, if_exists='replace')`. This line of code enables us to be able to create a table name for each month of the ingested data. It prevents us from adding records to the same table over and over again. This is called **idempotency**.
+
+Say we have an ingestion task:
+Ingest(2022, 1) --> some data is produced. After some time the task breaks midway and we have half the records. We may want to retry after solving for the bugs. If we hadn.t dropped the database and keep inserting the database, we will have copies of the records. Howver, if we drop the database everytime we rety we will have the same records. This i was what is called idempotency.

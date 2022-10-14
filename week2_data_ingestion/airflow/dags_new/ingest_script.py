@@ -4,8 +4,7 @@ import os
 import sys
 import pandas as pd
 from sqlalchemy import create_engine
-import psycopg2 
-import pyarrow
+
 from time import time
 # get_ipython().system('{sys.executable} -m pip install pyarrow')
 
@@ -15,28 +14,19 @@ from time import time
 
 
 
-def ingest_callable(user, password, host, port ,db, tablename, parquet_file):
-    print(tablename, parquet_file)
-    
-    
-    
-    
-    # download parquet, convert to csv
+def ingest_callable(user, password, host, port ,db, tablename, csv_file):
+    print(tablename, csv_file)
+   
   
     engine=create_engine(f"postgresql://{user}:{password}@{host}:{port}/{db}")  # connecting to the docker postgres locally
     engine.connect()
     
-    print('connection establsihed successfully, inserting data')
+    print('connection establsihed successfully, inserting data....') #for checks to see if connection was done
     
-    # df=pd.read_parquet(parquet_name) #engine='pyarrow')
-    
-    
-    # csv_name='output.csv'
-    # df=df.to_csv(csv_name, index=False)
     
     t_start=time()
     
-     df_iter=pd.read_parquet(parquet_file, iterator=True, chunksize=100000) # to check if can make a DAG
+    df_iter=pd.read_csv(csv_file, iterator=True, chunksize=100000) # to check if can make a DAG
 
     df=next(df_iter)
 
@@ -45,7 +35,7 @@ def ingest_callable(user, password, host, port ,db, tablename, parquet_file):
     df.tpep_dropoff_datetime=pd.to_datetime(df.tpep_dropoff_datetime)
 
 
-    df.head(n=0).to_sql(name=tablename,con=engine, if_exists='replace') # for column heads
+    df.head(n=0).to_sql(name=tablename,con=engine, if_exists='replace') # for column heads for 
 
 
 
