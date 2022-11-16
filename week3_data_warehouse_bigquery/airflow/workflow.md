@@ -50,4 +50,7 @@ The point of using `BigQueryInsertJobOperator` class helps you create an operato
 
 > DDL stands for Data Definition Language. DML stands for Data Manipulation Language. DDL statements are used to create database, schema, constraints, users, tables etc. DML statement is used to insert, update or delete the records.
 
-With the class you can define a variable with a DML query Then put it into the `BigQueryInsertJobOperator` to do the operation
+With the class you can define a variable with a DML query Then put it into the `BigQueryInsertJobOperator` to do the operation.
+
+
+**TODO** Find a way to drop both columns of the two datasets using using python and sql syntax to automate 

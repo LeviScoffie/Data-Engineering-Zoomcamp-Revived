@@ -1,0 +1,16 @@
+ # easy navigation commands
+
+ docker-compose -f docker-compose-no-frills.yml build --no-cache
+
+
+ docker-compose -f docker-compose-no-frills.yml up
+
+
+
+
+ docker-compose  -f docker-compose-no-frills.yml down --volumes --rmi all
+
+
+
+export GOOGLE_APPLICATION_CREDENTIALS=~/.google/credentials/google_credentials.json
+gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS

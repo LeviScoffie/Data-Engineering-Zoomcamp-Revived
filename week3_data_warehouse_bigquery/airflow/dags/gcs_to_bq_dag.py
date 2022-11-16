@@ -20,7 +20,10 @@ path_to_local_home = os.environ.get("AIRFLOW_HOME","/opt/AIRFLOW/")
 BIGQUERY_DATASET = os.environ.get ("BIGQUERY_DATASET",'trips_data_all')
 
 
-
+DATASET='tripdata'
+COLOUR={'yellow':'tpep_pickup_datetime', 'green':'lpep_pickup_datetime'}
+INPUT="raw"
+FILETYPE="parquet"
 
 
 default_args = {
@@ -32,7 +35,7 @@ default_args = {
 
 
 with DAG(
-    dag_id = "data_ingestion_gcs_dag",
+    dag_id = "gcs_2_bq_dag",
     schedule_interval = "@daily",
     default_args =default_args,
     catchup = False,
@@ -41,55 +44,72 @@ with DAG(
     
 ) as dag:
     
-    gcs_to_gcs_task= GCSToGCSOperator(
-        task_id="gcs_to_gcs_task",
-        source_bucket=BUCKET, # because we have already assigned the gcs bucket id  here "BUCKET= os.environ.get("GCP_GCS_BUCKET")" in docker config. so we are just picking up the env. variable
-        source_object="raw/yellow_tripdata*.parquet",
-        destination_bucket=BUCKET,
-        destination_object="yellow/",
-        move_object=True,
-        # gcp_conn_id=google_cloud_conn_id we dont need this becasue api configured in dockercompose.yml file
-    )
-        
+    for colour, ds_col in COLOUR.items():
     
-    
-    gcs_to_bq_ext_task = BigQueryCreateExternalTableOperator(
-        task_id="gcs_to_bq_ext_task",
-        table_resource={
-            "tableReference": {
-                "projectId": PROJECT_ID,
-                "datasetId": BIGQUERY_DATASET,
-                "tableId": "external_yellow_tripdata",
-            },
-            "externalDataConfiguration": {
-                "sourceFormat": "PARQUET",
-                "sourceUris": [f"gs://{BUCKET}/yellow"],
-            },
-        },
-    )
-    
-    
-    CREATE_PARTITIONED_TABLE_QUERY=(f"CREATE OR REPLACE TABLE loyal-glass-359906.nytaxi.yellow_tripdata_partitioned \
-    PARTITION BY DATE (tpep_pickup_datetime) \
-    AS \
-    SELECT * FROM {BIGQUERY_DATASET}.external_yellow_tripdata;"
-    )
-
-    
-    
-    bq_ext_to_partition_task = BigQueryInsertJobOperator(
-        task_id="bq_ext_to_partition_task",
-        configuration={
-            "query":{
-                "query": CREATE_PARTITIONED_TABLE_QUERY,
-              "useLegacySql": False,
-              
-            }
-                
-        },
-    )
+        move_files_gsc_task= GCSToGCSOperator(
+            task_id=f"move_{colour}_{DATASET}_files_task",
+            source_bucket=BUCKET, # because we have already assigned the gcs bucket id  here "BUCKET= os.environ.get("GCP_GCS_BUCKET")" in docker config. so we are just picking up the env. variable
+            source_object=f"{INPUT}/{colour}_{DATASET}*.{FILETYPE}",
+            destination_bucket=BUCKET,
+            destination_object=f"{colour}/{colour}_{DATASET}",
+            move_object=True,
+            # gcp_conn_id=google_cloud_conn_id we dont need this becasue api configured in dockercompose.yml file
+        )
             
-    
-    
-    
-    gcs_to_gcs_task >> gcs_to_bq_ext_task >> bq_ext_to_partition_task
+        
+        
+        bigquery_external_table_task = BigQueryCreateExternalTableOperator(
+            task_id=f"bq_{colour}_{DATASET}_files_task",
+            table_resource={
+                "tableReference": {
+                    "projectId": PROJECT_ID,
+                    "datasetId": BIGQUERY_DATASET,
+                    "tableId": f"{colour}_{DATASET}_external_table",
+                },
+                "externalDataConfiguration": {
+                    "sourceFormat": "PARQUET",
+                    "sourceUris": [f"gs://{BUCKET}/{colour}/*"],
+                },
+            },
+        )
+        
+        # DROP_TABLE_COLUMN_QUERY=(f"ALTER TABLE {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table\
+        #     DROP COLUMNS IF EXISTS ['airport_fee']")
+        
+        
+        # update_table_schema_task = BigQueryUpdateTableSchemaOperator(
+        #     task_id="update_table_schema_task",
+        #     dataset_id={DATASET},
+        #     table_id="test_table",
+        #     schema_fields_updates=[
+        #         {"name": "emp_name", "description": "Name of employee"},
+        #         {"name": "salary", "description": "Monthly salary in USD"},
+        #     ],
+        # )
+
+        
+        
+        CREATE_PARTITIONED_TABLE_QUERY=(f"CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{colour}_{DATASET}_partitioned\
+        PARTITION BY DATE ({ds_col})\
+        AS \
+        SELECT * EXCEPT (ehail_fee) FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"  #find a way to incooporate both green and yellow tripdata in one statement
+        )   
+
+        
+        
+        bq_create_partition_task = BigQueryInsertJobOperator(
+            task_id=F"bq_create_{colour}_{DATASET}_partition_task",
+            configuration={
+                "query":{
+                    "query": CREATE_PARTITIONED_TABLE_QUERY,
+                "useLegacySql": False,
+                
+                }
+                    
+            },
+        )
+                
+        
+        
+        
+        move_files_gsc_task >> bigquery_external_table_task >> bq_create_partition_task
