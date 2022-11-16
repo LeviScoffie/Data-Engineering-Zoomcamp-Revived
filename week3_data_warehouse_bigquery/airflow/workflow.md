@@ -53,4 +53,13 @@ The point of using `BigQueryInsertJobOperator` class helps you create an operato
 With the class you can define a variable with a DML query Then put it into the `BigQueryInsertJobOperator` to do the operation.
 
 
-**TODO** Find a way to drop both columns of the two datasets using using python and sql syntax to automate 
+**TODO** _Find a way to drop both columns of the two datasets using using python and sql syntax to automate_ ??
+
+
+These bigquery operators are generally wrappers to the cloud sdk functions provided to us by officianl providers such as gcloud in our case.
+
+For instance, the **BigQueryCreateExternalTableOperator()**operator  has the "ExternalDataConfiguration" wrapper we can checkout what we cab pass without the JSON configuration key we can use the `autodetect` key tag.
+
+This tag exclusively autodetects the schema and creates a table based on that schema.
+
+
