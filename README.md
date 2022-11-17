@@ -8,3 +8,5 @@ A step by step course work done by ALEXEY on youtube.
  ### WEEK 2: AIRFLOW AND DATA INGESTION 
 
  ### WEEK 3 : DATA WAREHOUSING AND BIG QUERY
+
+ ### WEEK 4: ANALYTICS ENGINEERING

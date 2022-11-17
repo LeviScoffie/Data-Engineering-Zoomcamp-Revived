@@ -92,7 +92,7 @@ with DAG(
         CREATE_PARTITIONED_TABLE_QUERY=(f"CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{colour}_{DATASET}_partitioned\
         PARTITION BY DATE ({ds_col})\
         AS \
-        SELECT * EXCEPT (ehail_fee) FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"  #find a way to incooporate both green and yellow tripdata in one statement
+        SELECT * EXCEPT (airport_fee) FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"  #find a way to incooporate both green and yellow tripdata in one statement
         )   
 
         

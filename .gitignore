@@ -12,3 +12,7 @@ week1basicsnsetup/1_Terraform_GCP/.terraform/providers/registry.terraform.io/has
 week1basicsnsetup/1_Terraform_GCP/test.py
 week2_data_ingestion/airflow/logs
 week3_data_warehouse_bigquery/airflow/logs
+week4_analytics_engineering/dbt-bq-docker-setup/profiles.yml
+week4_analytics_engineering/dbt-bq-docker-setup/dbt/ny_taxi_rdes
+week4_analytics_engineering/dbt-bq-docker-setup/dbt/logs
+week4_analytics_engineering/dbt-bq-docker-setup/.user.yml
