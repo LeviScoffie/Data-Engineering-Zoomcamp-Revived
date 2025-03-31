@@ -1,0 +1,38 @@
+services:
+  pgdatabase:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: ny_taxi
+    volumes:
+      - "./ny_taxi_postgres_data:/var/lib/postgresql/data:rw"
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root@root.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "8080:80"
+    deploy:
+      resources:
+        limits:
+          memory: 512M  # Limit pgAdmin memory usage
+
+  ingestion:
+    image: taxidataingest:v001
+    depends_on:
+      - pgdatabase
+      #command line arguments 
+    command: [
+      "--user=root",
+      "--password=root",
+      "--host=pgdatabase",
+      "--port=5432",
+      "--db=ny_taxi",
+      "--url=https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet",
+      "--table_name=yellow_taxi_data"
+    ]
