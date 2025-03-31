@@ -1,3 +1,4 @@
-2_docker_sql/tlc-trip-record-data.page
-2_docker_sql/taxi+_zone_lookup.csv
-2_docker_sql/.data
+input.parquet
+output.csv
+ipynb_checkpoints/
+ny_taxi_postgres_data/
