@@ -9,13 +9,13 @@ terraform {
 
 provider "google" {
   # Configuration options
-  project = "optimal-tide-455508-g4"
-  region  = "me-west1"
+  project = var.project
+  region  = var.location
 }
 
 resource "google_storage_bucket" "demo-bucket" {
-  name          = "optimal-tide-455508-g4-terra-bucket"
-  location      = "me-west1"
+  name          = var.gcs_bucket_name
+  location      = var.location
   force_destroy = true
 
 
@@ -27,4 +27,9 @@ resource "google_storage_bucket" "demo-bucket" {
       type = "AbortIncompleteMultipartUpload"
     }
   }
+}
+
+resource "google_bigquery_dataset" "demo-dataset" {
+  dataset_id = var.bq_dataset_name
+  location = var.location
 }
