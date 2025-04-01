@@ -5,6 +5,7 @@ ny_taxi_postgres_data/
 terraform-gcp/.env
 terraform-gcp/keys
 terraform-gcp/terraform.tfstate
+terraform-gcp/.terraform.lock.hcl
 # Local .terraform directories
 **/.terraform/*
 
