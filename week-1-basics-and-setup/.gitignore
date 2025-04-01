@@ -4,3 +4,4 @@ ipynb_checkpoints/
 ny_taxi_postgres_data/
 terraform-gcp/.env
 terraform-gcp/keys
+terraform-gcp/terraform.tfstate
