@@ -6,6 +6,7 @@ terraform-gcp/.env
 terraform-gcp/keys
 terraform-gcp/terraform.tfstate
 terraform-gcp/.terraform.lock.hcl
+terraform-gcp/variables.tf
 # Local .terraform directories
 **/.terraform/*
 
