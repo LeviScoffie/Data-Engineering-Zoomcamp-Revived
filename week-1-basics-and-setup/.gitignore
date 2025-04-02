@@ -2,6 +2,7 @@ input.parquet
 output.csv
 ipynb_checkpoints/
 ny_taxi_postgres_data/
+data/
 terraform-gcp/.env
 terraform-gcp/keys
 terraform-gcp/terraform.tfstate
