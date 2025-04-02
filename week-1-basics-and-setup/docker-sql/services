@@ -21,6 +21,7 @@ services:
 
 
 docker run -it \
+ 
   -e POSTGRES_USER="root" \
   -e POSTGRES_PASSWORD="root" \
   -e POSTGRES_DB="ny_taxi" \
@@ -53,8 +54,9 @@ URL="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.par
 
 docker build -t taxidataingest:v001 .
 
-
+URL="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet"
 docker run -it --rm \
+  --network=docker-sql_default \
   taxidataingest:v001 \
     --user=root \
     --password=root \
@@ -62,7 +64,7 @@ docker run -it --rm \
     --port=5432 \
     --db=ny_taxi \
     --url="${URL}" \
-    --table_name=yellow_taxi_data
+    --tb=yellow_taxi_trips
 
 
 
